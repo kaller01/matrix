@@ -1,0 +1,17 @@
+"use strict";
+exports.__esModule = true;
+var Matrix_1 = require("./Matrix");
+// const infixToPostfix = require('infix-to-postfix');
+var input = "1 1 1; 1 1 1; 1 1 1";
+var a = new Matrix_1["default"](input);
+a.print();
+a.evaluate("r1-3*r2");
+a.print();
+a.evaluate("r1|r2");
+a.print();
+a.evaluate("k1+k2");
+a.print();
+a.simplify();
+a.print();
+var b = "r1|r2";
+console.log(b.matchAll(/[rk]/));

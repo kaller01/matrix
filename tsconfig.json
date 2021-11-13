@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2016",
+        "jsx": "preserve",
+        "sourceMap": true,
+        "lib": [
+            "dom",
+            "es7",
+            "es2020.string"
+         ]
+         
+    },
+    "exclude": [
+        "node_modules",
+        "**/node_modules/*"
+    ]
+}
