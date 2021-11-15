@@ -1,17 +1,28 @@
 import * as math from 'mathjs'
-import { re } from 'mathjs';
+import { matrix, re } from 'mathjs';
 
 export default class Matrix {
     matrix: String[][];
 
 
-    constructor(input: String) {
+    setup(input: String) {
         let tmp: String[] = input.split(";");
         let matrix = new Array(tmp.length);
         for (let i = 0; i < matrix.length; i++) {
             matrix[i] = (tmp[i].trim().split(" "))
         }
         this.matrix = matrix;
+    }
+
+    constructor(x: number, y: number) {
+        this.matrix = new Array(x)
+        for (let i = 0; i < x; i++) {
+            this.matrix[i] = new Array(y)
+            for (let j = 0; j < y; j++) {
+                this.matrix[i][j] = "0";
+            }
+
+        }
     }
 
     simplify() {
@@ -26,28 +37,22 @@ export default class Matrix {
         return [this.matrix.length, this.matrix[0].length]
     }
 
-    addCol(to: number, from: number, multiple: number) {
-        to--;
-        from--;
-
-        for (let i = 0; i < this.size()[1]; i++) {
-            this.matrix[i][to] += "+(" + this.matrix[i][from] + "*" + multiple + ")";
-        }
-    }
 
     evalRow(to: number, from: number, multiple: String) {
+        console.log({ to, from, multiple })
         to--;
         from--;
-        for (let i = 0; i < this.size()[0]; i++) {
-            this.matrix[to][i] = "(" + this.matrix[to][i] + ")" + multiple + this.matrix[from][i];
+        for (let i = 0; i < this.size()[1]; i++) {
+            this.matrix[to][i] = `(${this.matrix[to][i]})${multiple}(${this.matrix[from][i]})`;
         }
     }
 
     evalCol(to: number, from: number, multiple: String) {
+        console.log({ to, from, multiple })
         to--;
         from--;
-        for (let i = 0; i < this.size()[1]; i++) {
-            this.matrix[i][to] = "(" + this.matrix[i][to] + ")" + multiple + this.matrix[i][from];
+        for (let i = 0; i < this.size()[0]; i++) {
+            this.matrix[i][to] = `(${this.matrix[i][to]})${multiple}(${this.matrix[i][from]})`;
         }
     }
 
@@ -64,6 +69,9 @@ export default class Matrix {
                 this.swapCol(result.to, result.from)
         } else {
             let result = this.evaluateExpression(input)
+            if (!Matrix.endsWithOperator(result.operations))
+                result.operations += "*"
+
             if (result.direction == "r")
                 this.evalRow(result.to, result.from, result.operations)
             else
@@ -107,18 +115,6 @@ export default class Matrix {
         return result
     }
 
-    multiplyRow(to: number, multiple: number) {
-        to--;
-        for (let i = 0; i < this.size()[0]; i++) {
-            this.matrix[to][i] += "*" + multiple;
-        }
-    }
-    multiplyCol(to: number, multiple: number) {
-        to--;
-        for (let i = 0; i < this.size()[1]; i++) {
-            this.matrix[i][to] += "*" + multiple;
-        }
-    }
 
     swapRow(to: number, from: number) {
         to--;
@@ -139,8 +135,71 @@ export default class Matrix {
         }
     }
 
+    multiply(matrix: Matrix) {
+        console.log(this.size())
+        console.log(matrix.size())
+        if (this.size()[1] == matrix.size()[0]) {
+
+            for (let i = 0; i < this.size()[0]; i++) {
+
+                for (let i = 0; i < matrix.size()[0]; i++) {
+
+
+                }
+
+            }
+
+
+        } else {
+            console.error("Matrix does not match");
+        }
+
+    }
+
+    get(x, y) {
+        return this.matrix[x][y]
+    }
+    set(x, y, value) {
+        this.matrix[x][y] = value;
+    }
+
+    static multiply(a: Matrix, b: Matrix) {
+        if (a.size()[1] == b.size()[0]) {
+            const m = a.size()[1]
+            const c = new Matrix(a.size()[0], b.size()[1])
+
+            for (let i = 0; i < c.size()[0]; i++) {
+                for (let j = 0; j < c.size()[1]; j++) {
+                    let sum = "";
+                    for (let k = 0; k < m; k++) {
+                        sum += a.get(i, k) + "*" + b.get(k, j) + "+"
+                    }
+
+                    c.set(i, j, math.simplify(sum + "0").toString())
+                }
+
+            }
+            return c;
+
+        } else {
+            console.error("Matrix does not match r*m m*k");
+        }
+    }
+
+
+    static endsWithOperator(multiple: String): boolean {
+        switch (multiple.slice(multiple.length - 1)) {
+            case "+":
+            case "-":
+            case "*":
+            case "/":
+                return true;
+
+        }
+        return false;
+    }
+
     print() {
-        // this.simplify()
         console.table(this.matrix)
     }
 }
