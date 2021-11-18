@@ -45,6 +45,20 @@ class Matrix {
             this.matrix[i][to] = `(${this.matrix[i][to]})${multiple}(${this.matrix[i][from]})`;
         }
     }
+    evalMultCol(to, multiple) {
+        console.log({ to, multiple });
+        to--;
+        for (let i = 0; i < this.size()[0]; i++) {
+            this.matrix[i][to] = `(${this.matrix[i][to]})${multiple}`;
+        }
+    }
+    evalMultRow(to, multiple) {
+        console.log({ to, multiple });
+        to--;
+        for (let i = 0; i < this.size()[1]; i++) {
+            this.matrix[to][i] = `(${this.matrix[to][i]})${multiple}`;
+        }
+    }
     evaluate(input) {
         if (input.match(/\|/)) {
             // this.swapRow()
@@ -54,7 +68,8 @@ class Matrix {
             else
                 this.swapCol(result.to, result.from);
         }
-        else {
+        else if (Matrix.containsTwoLines(input)) {
+            console.log(input);
             let result = this.evaluateExpression(input);
             if (!Matrix.endsWithOperator(result.operations))
                 result.operations += "*";
@@ -63,13 +78,28 @@ class Matrix {
             else
                 this.evalCol(result.to, result.from, result.operations);
         }
+        else {
+            let result = this.evaluateMult(input);
+            if (result.direction == "r")
+                this.evalMultRow(result.to, result.multiple);
+            else
+                this.evalMultCol(result.to, result.multiple);
+        }
+    }
+    evaluateMult(input) {
+        let line = input.match(/[kr]\d/g)[0];
+        let multiple = input.split(line)[1];
+        return {
+            to: parseInt(line.replace(/r|k/, "")),
+            multiple,
+            direction: line[0]
+        };
     }
     evaluateSwap(input) {
         let args = input.split(/\|/);
         return {
             to: parseInt(args[0].replace(/r|k/, "")),
             from: parseInt(args[1].replace(/r|k/, "")),
-            operation: "swap",
             direction: args[0][0]
         };
     }
@@ -80,7 +110,6 @@ class Matrix {
             to: 0,
             from: 0,
             direction: "",
-            operation: "expression",
             operations: ""
         };
         args.forEach(arg => {
@@ -112,19 +141,6 @@ class Matrix {
             tmp[i] = this.matrix[i][to];
             this.matrix[i][to] = this.matrix[i][from];
             this.matrix[i][from] = tmp[i];
-        }
-    }
-    multiply(matrix) {
-        console.log(this.size());
-        console.log(matrix.size());
-        if (this.size()[1] == matrix.size()[0]) {
-            for (let i = 0; i < this.size()[0]; i++) {
-                for (let i = 0; i < matrix.size()[0]; i++) {
-                }
-            }
-        }
-        else {
-            console.error("Matrix does not match");
         }
     }
     get(x, y) {
@@ -161,6 +177,9 @@ class Matrix {
                 return true;
         }
         return false;
+    }
+    static containsTwoLines(expression) {
+        return (expression.match(/[kr]\d/g).length) == 2;
     }
     print() {
         console.table(this.matrix);

@@ -56,6 +56,22 @@ export default class Matrix {
         }
     }
 
+    evalMultCol(to: number, multiple: String) {
+        console.log({ to, multiple })
+        to--;
+        for (let i = 0; i < this.size()[0]; i++) {
+            this.matrix[i][to] = `(${this.matrix[i][to]})${multiple}`;
+        }
+    }
+
+    evalMultRow(to: number, multiple: String) {
+        console.log({ to, multiple })
+        to--;
+        for (let i = 0; i < this.size()[1]; i++) {
+            this.matrix[to][i] = `(${this.matrix[to][i]})${multiple}`;
+        }
+    }
+
 
 
 
@@ -67,7 +83,8 @@ export default class Matrix {
                 this.swapRow(result.to, result.from)
             else
                 this.swapCol(result.to, result.from)
-        } else {
+        } else if (Matrix.containsTwoLines(input)) {
+            console.log(input)
             let result = this.evaluateExpression(input)
             if (!Matrix.endsWithOperator(result.operations))
                 result.operations += "*"
@@ -76,6 +93,22 @@ export default class Matrix {
                 this.evalRow(result.to, result.from, result.operations)
             else
                 this.evalCol(result.to, result.from, result.operations)
+        } else {
+            let result = this.evaluateMult(input);
+            if (result.direction == "r")
+                this.evalMultRow(result.to, result.multiple)
+            else
+                this.evalMultCol(result.to, result.multiple)
+        }
+    }
+
+    evaluateMult(input: String) {
+        let line = input.match(/[kr]\d/g)[0];
+        let multiple = input.split(line)[1];
+        return {
+            to: parseInt(line.replace(/r|k/, "")),
+            multiple,
+            direction: line[0]
         }
     }
 
@@ -84,11 +117,9 @@ export default class Matrix {
         return {
             to: parseInt(args[0].replace(/r|k/, "")),
             from: parseInt(args[1].replace(/r|k/, "")),
-            operation: "swap",
             direction: args[0][0]
         }
     }
-
     evaluateExpression(input: String) {
         let args = math.simplify(input + "").toString().split(" ")
         let operands = []
@@ -96,7 +127,6 @@ export default class Matrix {
             to: 0,
             from: 0,
             direction: "",
-            operation: "expression",
             operations: ""
         }
         args.forEach(arg => {
@@ -135,27 +165,6 @@ export default class Matrix {
         }
     }
 
-    multiply(matrix: Matrix) {
-        console.log(this.size())
-        console.log(matrix.size())
-        if (this.size()[1] == matrix.size()[0]) {
-
-            for (let i = 0; i < this.size()[0]; i++) {
-
-                for (let i = 0; i < matrix.size()[0]; i++) {
-
-
-                }
-
-            }
-
-
-        } else {
-            console.error("Matrix does not match");
-        }
-
-    }
-
     get(x, y) {
         return this.matrix[x][y]
     }
@@ -174,7 +183,6 @@ export default class Matrix {
                     for (let k = 0; k < m; k++) {
                         sum += a.get(i, k) + "*" + b.get(k, j) + "+"
                     }
-
                     c.set(i, j, math.simplify(sum + "0").toString())
                 }
 
@@ -197,6 +205,10 @@ export default class Matrix {
 
         }
         return false;
+    }
+
+    static containsTwoLines(expression: String): boolean {
+        return (expression.match(/[kr]\d/g).length) == 2;
     }
 
     print() {

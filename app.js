@@ -40,7 +40,8 @@ function execute(input) {
         input = input.split("*=");
         name = input[0];
         let target = input[1];
-        (Matrix_1.default.multiply(data[name], data[target])).print();
+        data[name] = (Matrix_1.default.multiply(data[name], data[target]));
+        data[name].print();
     }
     else if (input.includes("=")) {
         input = input.split("=");
