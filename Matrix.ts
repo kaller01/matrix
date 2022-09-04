@@ -6,12 +6,27 @@ export default class Matrix {
 
 
     setup(input: String) {
-        let tmp: String[] = input.split(";");
-        let matrix = new Array(tmp.length);
+        input = input.replaceAll("\n","; ").replaceAll("\t"," ")
+        let rows: String[] = input.split(";");
+        let matrix = new Array(rows.length);
         for (let i = 0; i < matrix.length; i++) {
-            matrix[i] = (tmp[i].trim().split(" "))
+            matrix[i] = (rows[i].trim().split(" "))
         }
         this.matrix = matrix;
+        if(this.matrix[matrix.length-1][0]=== ""){
+            this.matrix.splice(this.matrix.length-1,1)
+        }
+    }
+
+    dump(){
+        let dump = "";
+        this.matrix.forEach((row, x) => {
+            row.forEach((item, y) => {
+                dump+=item+" ";
+            })
+            dump+="; "
+        })
+        return dump;
     }
 
     constructor(x: number, y: number) {
@@ -29,6 +44,7 @@ export default class Matrix {
         this.matrix.forEach((row, x) => {
             row.forEach((item, y) => {
                 this.matrix[x][y] = math.simplify(item + "").toString()
+                // this.matrix[x][y] = math.rationalize(item + "").toString()
             })
         })
     }
@@ -86,8 +102,12 @@ export default class Matrix {
         } else if (Matrix.containsTwoLines(input)) {
             console.log(input)
             let result = this.evaluateExpression(input)
-            if (!Matrix.endsWithOperator(result.operations))
+            if (!Matrix.endsWithOperator(result.operations)){
                 result.operations += "*"
+            }
+
+            //fixed division issue
+            // result.operations = result.operations.replaceAll("+*", "+1*")
 
             if (result.direction == "r")
                 this.evalRow(result.to, result.from, result.operations)
@@ -121,6 +141,8 @@ export default class Matrix {
         }
     }
     evaluateExpression(input: String) {
+        // console.log(input)
+        // console.log(math.simplify(input + "").toString());
         let args = math.simplify(input + "").toString().split(" ")
         let operands = []
         let result = {
@@ -163,6 +185,16 @@ export default class Matrix {
             this.matrix[i][to] = this.matrix[i][from];
             this.matrix[i][from] = tmp[i];
         }
+    }
+
+    removeRow(row: number){
+        this.matrix.splice(row,1);
+    }
+
+    removeCol(col: number){
+        this.matrix.forEach(row=>{
+            row.splice(col,1);
+        })
     }
 
     get(x, y) {

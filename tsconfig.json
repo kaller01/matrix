@@ -7,7 +7,7 @@
         "lib": [
             "dom",
             "es7",
-            "es2020.string"
+            "es2021.string"
          ]
          
     },
